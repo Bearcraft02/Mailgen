@@ -397,6 +397,25 @@
             font-weight: bold;
         }
 
+        .target-hint {
+            margin-top: auto;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+            color: #d1d5db;
+            text-align: left;
+            line-height: 1.4;
+        }
+        
+        .target-hint strong {
+            display: block;
+            color: var(--primary);
+            margin-bottom: 2px;
+            font-size: 0.8rem;
+        }
+
         .coop-hint {
             margin-top: auto;
             background: rgba(34, 197, 94, 0.1);
@@ -613,7 +632,12 @@
                     <div class="service-card" onclick="selectService(this, 'targeted')">
                         <h4 style="color: var(--primary);">Targeted Marketing</h4>
                         <div style="font-size: 1.5rem; font-weight: 800; margin: 0.5rem 0;">$1.23</div>
-                        <p style="font-size: 0.85rem;">Per unit. Precise demographic targeting.</p>
+                        <p style="font-size: 0.85rem; margin-bottom: 1rem;">Per unit. Precise demographic targeting.</p>
+                        
+                        <div class="target-hint">
+                            <strong>🎯 Digital Metrics, Physical Reach</strong>
+                            We target the same metrics as online ads but link them to specific addresses. This lowers your cost per lead while increasing brand authenticity.
+                        </div>
                     </div>
 
                     <div class="service-card" onclick="selectService(this, 'private')">
