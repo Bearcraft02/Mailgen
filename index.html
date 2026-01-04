@@ -33,6 +33,7 @@
             background-color: var(--bg-body);
             background-image: radial-gradient(circle at top center, #1e293b 0%, #09090b 40%);
             -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
         }
 
         /* Typography */
@@ -106,6 +107,7 @@
             color: var(--text-muted);
             opacity: 0.7;
             transition: opacity 0.2s;
+            text-decoration: none;
         }
         
         .email-link:hover { opacity: 1; color: var(--accent); }
@@ -513,6 +515,32 @@
             font-size: 1.2rem;
             margin-top: -1px; /* Overlap border */
         }
+        
+        /* New Summary Grid Styles */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .summary-item .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        .summary-item .value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        @media (max-width: 600px) {
+            .summary-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+        }
 
         /* Trust & Footer */
         .trust-section { padding: 8rem 2rem; text-align: center; }
@@ -686,6 +714,10 @@
                     </div>
                 </div>
 
+                <div id="service-error" style="color: #ef4444; text-align: center; margin-bottom: 1rem; display: none; font-weight: 600; background: rgba(239, 68, 68, 0.1); padding: 0.5rem; border-radius: 6px;">
+                    ⚠️ Please select a service option above to proceed.
+                </div>
+
                 <button class="calc-btn" onclick="calculateFinal()">Calculate Investment & Savings</button>
 
                 <!-- RESULTS DISPLAY -->
@@ -704,6 +736,25 @@
                     </div>
                     <div class="savings-banner" id="savings-banner">
                         TOTAL SAVINGS: <span id="savings-amount">$0</span>
+                    </div>
+
+                    <!-- NEW SUMMARY SECTION -->
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="label">Est. Leads</div>
+                            <div class="value" id="sum-leads" style="color: var(--primary);">0</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Lead Value</div>
+                            <div class="value" id="sum-val" style="color: var(--success);">$0</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="label">Expected Profit</div>
+                            <div class="value" id="sum-profit" style="color: var(--success);">$0</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; font-style: italic;">
+                        * Lead Value & Profit are estimates based on your provided inputs.
                     </div>
                 </div>
             </div>
@@ -773,14 +824,18 @@
             el.classList.add('active');
             selectedService = type;
             document.getElementById('final-result').style.display = 'none'; // Reset result
+            document.getElementById('service-error').style.display = 'none'; // Hide error
         }
 
         // FINAL CALCULATION
         function calculateFinal() {
+            const errorEl = document.getElementById('service-error');
+            
             if (!selectedService) {
-                alert("Please select a service option above.");
+                errorEl.style.display = 'block';
                 return;
             }
+            errorEl.style.display = 'none';
 
             const vol = parseInt(slider.value);
             
@@ -829,9 +884,23 @@
             const digitalCostEl = document.getElementById('digital-cost');
             const dereactSubEl = document.getElementById('dereact-sub');
             
+            // Recalculate leads and value for summary
+            const leadsCount = Math.round(vol * RATES.dm_response);
+            const leadValue = parseFloat(leadInput.value) || 0;
+            const totalRevenue = leadsCount * leadValue;
+            
+            // Populate Summary
+            document.getElementById('sum-leads').textContent = leadsCount.toLocaleString();
+            document.getElementById('sum-val').textContent = money.format(leadValue);
+            
             if (isRange) {
                 // Format range nicely
                 finalCostEl.textContent = `${money.format(myLowCost)} - ${money.format(myHighCost)}`;
+                
+                // Profit Range calculation
+                const minProfit = totalRevenue - myHighCost;
+                const maxProfit = totalRevenue - myLowCost;
+                document.getElementById('sum-profit').textContent = `${money.format(minProfit)} - ${money.format(maxProfit)}`;
                 
                 // Update subtitle for Co-op context
                 dereactSubEl.innerHTML = "Range reflects ad size:<br>Small Space (Low) vs. Large Space (High)";
@@ -842,6 +911,10 @@
                 document.querySelector('.comp-col.digital').style.opacity = '0.5';
             } else {
                 finalCostEl.textContent = money.format(myLowCost);
+                
+                const profit = totalRevenue - myLowCost;
+                document.getElementById('sum-profit').textContent = money.format(profit);
+
                 dereactSubEl.textContent = "Dereact Mail Campaign"; // Reset subtitle
                 digitalCostEl.textContent = money.format(digitalCost);
                 
