@@ -110,6 +110,37 @@
         
         .email-link:hover { opacity: 1; color: var(--accent); }
 
+        /* Scroll Hint Animation */
+        .scroll-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-muted);
+            opacity: 0;
+            animation: bounceIn 2s ease 4s forwards;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .scroll-hint svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: translate(-50%, -30px); }
+            40% { opacity: 1; transform: translate(-50%, 0); }
+            60% { transform: translate(-50%, -10px); }
+            100% { opacity: 0.7; transform: translate(-50%, 0); }
+        }
+
         /* Stats Grid */
         .stats-section {
             padding: 4rem 2rem;
@@ -346,6 +377,8 @@
             cursor: pointer;
             transition: all 0.2s;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .service-card:hover { border-color: var(--text-muted); }
@@ -362,6 +395,25 @@
             right: 10px;
             color: var(--primary);
             font-weight: bold;
+        }
+
+        .coop-hint {
+            margin-top: auto;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+            color: #d1d5db;
+            text-align: left;
+            line-height: 1.4;
+        }
+        
+        .coop-hint strong {
+            display: block;
+            color: var(--success);
+            margin-bottom: 2px;
+            font-size: 0.8rem;
         }
 
         .calc-btn {
@@ -452,6 +504,10 @@
             <a href="https://tally.so/r/D4kVpN" class="cta-button">Initialize Campaign</a>
             <a href="mailto:Bear@dreamfire.net" class="email-link">Bear@dreamfire.net</a>
         </div>
+
+        <div class="scroll-hint">
+            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
     </header>
 
     <section class="stats-section">
@@ -473,6 +529,20 @@
                 <div class="stat-label">Open Rate</div>
                 <div class="stat-desc">Physical mail is handled and reviewed.</div>
                 <div class="comparison">vs Email (20%)</div>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-number">75%</span>
+                <div class="stat-label">Brand Recall</div>
+                <div class="stat-desc">Tactile experience creates stronger memory encoding.</div>
+                <div class="comparison">vs Digital Ads (44%)</div>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-number">82%</span>
+                <div class="stat-label">Trust Index</div>
+                <div class="stat-desc">Millennials view print advertisements as more trustworthy than digital.</div>
+                <div class="comparison">Source: Amra & Elma 2025</div>
             </div>
 
             <div class="stat-card">
@@ -555,7 +625,12 @@
                     <div class="service-card" onclick="selectService(this, 'coop')">
                         <h4 style="color: var(--success);">Co-op Card</h4>
                         <div style="font-size: 1.5rem; font-weight: 800; margin: 0.5rem 0;">$375+</div>
-                        <p style="font-size: 0.85rem;">Shared space flat rate. Variable size. High ROI for Small Businesses. </p>
+                        <p style="font-size: 0.85rem; margin-bottom: 1rem;">Shared space flat rate. Variable size.</p>
+                        
+                        <div class="coop-hint">
+                            <strong>✨ The Retention Bonus</strong>
+                            Shared promotions mean homeowners keep this card around longer (the "Fridge Factor"), maximizing long-term exposure for small businesses.
+                        </div>
                     </div>
                 </div>
 
@@ -567,7 +642,7 @@
                         <div class="comp-col dereact">
                             <div class="comp-label" style="color: var(--success);">Your Investment</div>
                             <span class="comp-value" id="final-cost" style="color: var(--success);">$0</span>
-                            <div class="comp-sub">Dereact Mail Campaign</div>
+                            <div class="comp-sub" id="dereact-sub">Dereact Mail Campaign</div>
                         </div>
                         <div class="comp-col digital">
                             <div class="comp-label" style="color: var(--danger);">Digital Equivalent</div>
@@ -658,20 +733,39 @@
             const vol = parseInt(slider.value);
             
             // 1. Calculate Dereact Cost
-            let myCost = 0;
-            let isFlatRate = false;
+            let myLowCost = 0;
+            let myHighCost = 0;
+            let isRange = false;
 
-            if (selectedService === 'targeted') myCost = vol * 1.23;
-            else if (selectedService === 'private') myCost = vol * 0.97;
-            else {
-                isFlatRate = true;
-                myCost = 375; // Base for display logic
+            if (selectedService === 'targeted') {
+                myLowCost = vol * 1.23;
+                myHighCost = myLowCost;
+            } else if (selectedService === 'private') {
+                myLowCost = vol * 0.97;
+                myHighCost = myLowCost;
+            } else if (selectedService === 'coop') {
+                // Co-op Logic:
+                // Base (1-5000): $375 - $999
+                // Increases by 25% every 5,000 ADDITIONAL units
+                
+                const baseLow = 375;
+                const baseHigh = 999;
+                
+                // Determine multipliers
+                // 1000 - 5000: 0 steps -> 1.0x
+                // 5001 - 10000: 1 step -> 1.25x
+                // 10001 - 15000: 2 steps -> 1.50x
+                
+                // Logic: Subtract 1 to handle exact 5000 boundaries correctly (e.g. 5000 / 5000 = 1, but we want step 0)
+                const stepIndex = Math.floor((vol - 1) / 5000);
+                const multiplier = 1 + (stepIndex * 0.25);
+                
+                myLowCost = baseLow * multiplier;
+                myHighCost = baseHigh * multiplier;
+                isRange = true;
             }
 
             // 2. Calculate Digital Equivalent
-            // Leads from DM = Vol * 4.4%
-            // Digital Clicks Needed = Leads / 2.35% (Landing page conv)
-            // Digital Cost = Clicks * $2.30
             const leads = vol * RATES.dm_response;
             const digitalClicks = leads / RATES.fb_conv;
             const digitalCost = digitalClicks * RATES.fb_cpc;
@@ -679,17 +773,27 @@
             // 3. Update DOM
             const resBox = document.getElementById('final-result');
             const savingsBanner = document.getElementById('savings-banner');
+            const finalCostEl = document.getElementById('final-cost');
+            const digitalCostEl = document.getElementById('digital-cost');
+            const dereactSubEl = document.getElementById('dereact-sub');
             
-            if (isFlatRate) {
-                document.getElementById('final-cost').textContent = "$375 - $999";
-                document.getElementById('digital-cost').textContent = "N/A";
+            if (isRange) {
+                // Format range nicely
+                finalCostEl.textContent = `${money.format(myLowCost)} - ${money.format(myHighCost)}`;
+                
+                // Update subtitle for Co-op context
+                dereactSubEl.innerHTML = "Range reflects ad size:<br>Small Space (Low) vs. Large Space (High)";
+                
+                // For range, savings is ambiguous, so show range or N/A
+                digitalCostEl.textContent = "N/A";
                 savingsBanner.style.display = 'none';
                 document.querySelector('.comp-col.digital').style.opacity = '0.5';
             } else {
-                document.getElementById('final-cost').textContent = money.format(myCost);
-                document.getElementById('digital-cost').textContent = money.format(digitalCost);
+                finalCostEl.textContent = money.format(myLowCost);
+                dereactSubEl.textContent = "Dereact Mail Campaign"; // Reset subtitle
+                digitalCostEl.textContent = money.format(digitalCost);
                 
-                const savings = digitalCost - myCost;
+                const savings = digitalCost - myLowCost;
                 savingsBanner.style.display = 'block';
                 document.getElementById('savings-amount').textContent = money.format(savings);
                 document.querySelector('.comp-col.digital').style.opacity = '1';
