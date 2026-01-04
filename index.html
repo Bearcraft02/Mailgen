@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dereact Mail | The Physical Funnel</title>
-    <style>
+    <style>a
         :root {
             --bg-body: #09090b; /* Zinc 950 */
             --bg-surface: #18181b; /* Zinc 900 */
@@ -416,6 +416,25 @@
             font-size: 0.8rem;
         }
 
+        .private-hint {
+            margin-top: auto;
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+            color: #d1d5db;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .private-hint strong {
+            display: block;
+            color: var(--accent);
+            margin-bottom: 2px;
+            font-size: 0.8rem;
+        }
+
         .coop-hint {
             margin-top: auto;
             background: rgba(34, 197, 94, 0.1);
@@ -628,6 +647,10 @@
                 <h3 class="cost-title">Estimate Campaign Cost</h3>
                 <p style="text-align: center; margin-bottom: 2rem; color: var(--text-muted);">Select a service tier below to calculate your investment:</p>
                 
+                <div style="background: rgba(34, 197, 94, 0.1); border-radius: 8px; padding: 0.75rem; text-align: center; margin-bottom: 2rem; border: 1px solid rgba(34, 197, 94, 0.2);">
+                    <span style="color: var(--success); font-weight: 700;">🎁 Bonus:</span> <span style="color: var(--text-main);">All Graphic Design & Ad Creation is <span style="text-decoration: underline; text-decoration-color: var(--success);">Completely Free</span>.</span>
+                </div>
+
                 <div class="service-options">
                     <div class="service-card" onclick="selectService(this, 'targeted')">
                         <h4 style="color: var(--primary);">Targeted Marketing</h4>
@@ -643,7 +666,12 @@
                     <div class="service-card" onclick="selectService(this, 'private')">
                         <h4 style="color: var(--accent);">Private Card</h4>
                         <div style="font-size: 1.5rem; font-weight: 800; margin: 0.5rem 0;">$0.97</div>
-                        <p style="font-size: 0.85rem;">Per unit. Exclusive branding.</p>
+                        <p style="font-size: 0.85rem; margin-bottom: 1rem;">Per unit. Exclusive branding.</p>
+
+                        <div class="private-hint">
+                            <strong>💎 Nationwide Reach</strong>
+                            Designed and tailored to you. We send out to as many homes as you would like, in whichever zip codes you choose across the entire nation.
+                        </div>
                     </div>
 
                     <div class="service-card" onclick="selectService(this, 'coop')">
